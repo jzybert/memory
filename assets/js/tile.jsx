@@ -3,28 +3,42 @@ import React, {Component} from 'react';
 export default class Tile extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      matchFound: false,
-      showLetter: false,
+      index: props.index,
+      matchFound: props.matchFound,
+      showLetter: props.showLetter,
       letterDisplayed: props.letterDisplayed
     };
+
+    this.toggleLetter = this.toggleLetter.bind(this);
     this.revealLetter = this.revealLetter.bind(this);
   }
 
-  revealLetter() {
-    this.setState(state => {
-      let flag = state.showLetter ? true : true;
-      return {showLetter: flag}
-    });
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      matchFound: nextProps.matchFound,
+      showLetter: nextProps.showLetter
+    })
   }
+
+  toggleLetter() {
+    if (!this.state.matchFound) {
+      this.revealLetter();
+    }
+  }
+
+  revealLetter() {
+    this.props.handleOnClick(this.props.index);
+  };
 
   render() {
     const fill = this.state.matchFound ? 'green' : (this.state.showLetter ? 'white' : 'lightgrey');
-
-    let letter = this.state.showLetter ? <div>{this.props.letterDisplayed}</div> : <div />;
+    const letterColor = this.state.matchFound ? 'white' : 'black';
+    let letter = this.state.showLetter ? <div style={{color: letterColor}}>{this.state.letterDisplayed}</div> : null;
 
     return (
-      <div onClick={this.revealLetter} style={{
+      <div onClick={this.toggleLetter} style={{
         backgroundColor: fill,
         width: '100px',
         height: '100px',
