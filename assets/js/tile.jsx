@@ -18,7 +18,8 @@ export default class Tile extends Component {
   componentWillReceiveProps(nextProps) {
     this.setState({
       matchFound: nextProps.matchFound,
-      showLetter: nextProps.showLetter
+      showLetter: nextProps.showLetter,
+      letterDisplayed: nextProps.letterDisplayed
     })
   }
 

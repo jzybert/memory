@@ -11,14 +11,7 @@ class Starter extends Component {
     super(props);
 
     this.state = {
-      availableLetters: [
-        'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
-        'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
-      ],
-      tileLetters: [
-        'A', 'H', 'B', 'C', 'E', 'D', 'G', 'H',
-        'B', 'C', 'A', 'F', 'F', 'E', 'G', 'D'
-      ],
+      tileLetters: this.getLetters(),
       showLetters: [
         false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false, false
@@ -35,38 +28,31 @@ class Starter extends Component {
   }
 
   resetGame() {
-    this.setState(state => {
-      state.availableLetters = [];
-      state.showLetters = [];
-      state.matchFound = [];
-      return {
-        availableLetters: [
-          'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
-          'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
-        ],
-        tileLetters: [
-          this.randLetter(), this.randLetter(), this.randLetter(), this.randLetter(),
-          this.randLetter(), this.randLetter(), this.randLetter(), this.randLetter(),
-          this.randLetter(), this.randLetter(), this.randLetter(), this.randLetter(),
-          this.randLetter(), this.randLetter(), this.randLetter(), this.randLetter()
-        ],
-        showLetters: [
-          false, false, false, false, false, false, false, false,
-          false, false, false, false, false, false, false, false
-        ],
-        matchFound: [
-          false, false, false, false, false, false, false, false,
-          false, false, false, false, false, false, false, false
-        ],
-        numberOfClicks: 0
-      };
+    this.setState({
+      tileLetters: this.getLetters(),
+      showLetters: [
+        false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false
+      ],
+      matchFound: [
+        false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false
+      ],
+      numberOfClicks: 0
     });
   };
 
-  randLetter() {
-    let availableLetters = this.state.availableLetters;
-    let index = Math.floor(Math.random() * availableLetters.length);
-    return availableLetters.splice(index, 1)[0];
+  getLetters() {
+    let availableLetters = [
+      'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
+      'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
+    ];
+    let letters = [];
+    for (let ii = 0; ii < 16; ii++) {
+      let index = Math.floor(Math.random() * availableLetters.length);
+      letters.push(availableLetters.splice(index, 1)[0]);
+    }
+    return letters;
   }
 
   onTileClick(index) {
@@ -82,6 +68,7 @@ class Starter extends Component {
   }
 
   checkForMatching() {
+    console.log(this.state);
     let indices = [];
     this.state.showLetters.forEach((letter, index) => {
       if (letter && !this.state.matchFound[index]) {
