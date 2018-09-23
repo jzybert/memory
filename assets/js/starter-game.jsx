@@ -262,7 +262,9 @@ class Starter extends Component {
         </div>
         <div className="row">
           <button onClick={this.resetGame}>Reset Game</button>
-          <span className="score">{this.state.score}</span>
+        </div>
+        <div className="row">
+          <span className="score">Score: {this.state.score}</span>
         </div>
       </div>
     );
