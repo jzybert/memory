@@ -20,11 +20,28 @@ class Starter extends Component {
         false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false, false
       ],
-      numberOfClicks: 0
+      numberOfClicks: 0,
+      score: 0
     };
     this.resetGame = this.resetGame.bind(this);
     this.onTileClick = this.onTileClick.bind(this);
     this.checkForMatching = this.checkForMatching.bind(this);
+    this.checkForFinish = this.checkForFinish.bind(this);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    let indices = [];
+    prevState.showLetters.forEach((letter, index) => {
+      if (letter && !prevState.matchFound[index]) {
+        indices.push(index);
+      }
+    });
+    if (indices.length === 2) {
+      setTimeout(() => {
+        this.checkForMatching();
+        this.checkForFinish();
+      }, 1000);
+    }
   }
 
   resetGame() {
@@ -38,7 +55,8 @@ class Starter extends Component {
         false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false, false
       ],
-      numberOfClicks: 0
+      numberOfClicks: 0,
+      score: 0
     });
   };
 
@@ -64,11 +82,9 @@ class Starter extends Component {
         numberOfClicks: state.numberOfClicks
       }
     });
-    this.checkForMatching();
   }
 
   checkForMatching() {
-    console.log(this.state);
     let indices = [];
     this.state.showLetters.forEach((letter, index) => {
       if (letter && !this.state.matchFound[index]) {
@@ -78,20 +94,37 @@ class Starter extends Component {
 
     if (indices.length === 2) {
       if (this.state.tileLetters[indices[0]] === this.state.tileLetters[indices[1]]) {
-        this.setState(state => {
-          let matches = state.matchFound;
+        this.setState(prevState => {
+          let matches = prevState.matchFound;
           matches[indices[0]] = true;
           matches[indices[1]] = true;
-          return {matchFound: matches};
+          let newScore = prevState.score + 50;
+          return {
+            matchFound: matches,
+            score: newScore
+          };
         });
       } else {
-        this.setState(state => {
-          let show = state.showLetters;
+        this.setState(prevState => {
+          let show = prevState.showLetters;
           show[indices[0]] = false;
           show[indices[1]] = false;
           return {showLetters: show};
         });
       }
+    }
+  }
+
+  checkForFinish() {
+    let matches = this.state.matchFound;
+    let allMatched = matches.every(match => {
+      return match;
+    });
+    if (allMatched) {
+      this.setState(prevState => {
+        let newScore = prevState.score + Math.floor(10000 / prevState.numberOfClicks);
+        return {score: newScore};
+      });
     }
   }
 
@@ -220,7 +253,7 @@ class Starter extends Component {
         </div>
         <div className="row">
           <button onClick={this.resetGame}>Reset Game</button>
-          <span className="score">0</span>
+          <span className="score">{this.state.score}</span>
         </div>
       </div>
     );
