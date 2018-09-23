@@ -9,6 +9,7 @@ export default function game_init(root) {
 class Starter extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       availableLetters: [
         'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
@@ -25,7 +26,8 @@ class Starter extends Component {
       matchFound: [
         false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false, false
-      ]
+      ],
+      numberOfClicks: 0
     };
     this.resetGame = this.resetGame.bind(this);
     this.onTileClick = this.onTileClick.bind(this);
@@ -55,7 +57,8 @@ class Starter extends Component {
         matchFound: [
           false, false, false, false, false, false, false, false,
           false, false, false, false, false, false, false, false
-        ]
+        ],
+        numberOfClicks: 0
       };
     });
   };
@@ -68,8 +71,12 @@ class Starter extends Component {
 
   onTileClick(index) {
     this.setState(state => {
+      state.numberOfClicks = state.numberOfClicks + 1;
       state.showLetters[index] = !state.showLetters[index];
-      return {showLetters: state.showLetters}
+      return {
+        showLetters: state.showLetters,
+        numberOfClicks: state.numberOfClicks
+      }
     });
     this.checkForMatching();
   }
