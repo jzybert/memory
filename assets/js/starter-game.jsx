@@ -74,14 +74,23 @@ class Starter extends Component {
   }
 
   onTileClick(index) {
-    this.setState(state => {
-      state.numberOfClicks = state.numberOfClicks + 1;
-      state.showLetters[index] = !state.showLetters[index];
-      return {
-        showLetters: state.showLetters,
-        numberOfClicks: state.numberOfClicks
+    let indices = [];
+    this.state.showLetters.forEach((letter, index) => {
+      if (letter && !this.state.matchFound[index]) {
+        indices.push(index);
       }
     });
+
+    if (indices.length < 2) {
+      this.setState(state => {
+        state.numberOfClicks = state.numberOfClicks + 1;
+        state.showLetters[index] = !state.showLetters[index];
+        return {
+          showLetters: state.showLetters,
+          numberOfClicks: state.numberOfClicks
+        }
+      });
+    }
   }
 
   checkForMatching() {
