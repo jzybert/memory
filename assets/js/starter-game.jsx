@@ -1,47 +1,57 @@
-import React from 'react';
+import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import _ from 'lodash';
+import Tile from './tile.jsx'
 
 export default function game_init(root) {
   ReactDOM.render(<Starter />, root);
 }
 
-class Starter extends React.Component {
+class Starter extends Component {
   constructor(props) {
     super(props);
-    this.state = { left: false };
+    this.state = {
+      availableLetters: [
+        'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
+        'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
+      ]
+    }
   }
 
-  swap(_ev) {
-    let state1 = _.assign({}, this.state, { left: !this.state.left });
-    this.setState(state1);
-  }
-
-  hax(_ev) {
-    alert("hax!");
+  randLetter() {
+    let availableLetters = this.state.availableLetters;
+    let index = Math.floor(Math.random() * availableLetters.length);
+    return availableLetters.splice(index, 1);
   }
 
   render() {
-    let button = <div className="column" onMouseMove={this.swap.bind(this)}>
-      <p><button onClick={this.hax.bind(this)}>Click Me</button></p>
-    </div>;
-
-    let blank = <div className="column">
-      <p>Nothing here.</p>
-    </div>;
-
-    if (this.state.left) {
-      return <div className="row">
-        {button}
-        {blank}
-      </div>;
-    }
-    else {
-      return <div className="row">
-        {blank}
-        {button}
-      </div>;
-    }
+    return (
+      <div className="column">
+        <div className="row">
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+        </div>
+        <div className="row">
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+        </div>
+        <div className="row">
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+        </div>
+        <div className="row">
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+          <Tile letterDisplayed={this.randLetter()}/>
+        </div>
+      </div>
+    );
   }
 }
 
