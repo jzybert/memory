@@ -1,3 +1,15 @@
-<div id="root">
-  React app loading...
+<div class="row">
+  <div class="column">
+    <h1 id="index-page">Join a Game</h1>
+    <input type="text" placeholder="Enter a game name..." id="name-input">
+    <button onclick=goToGame()>Join Game</button>
+  </div>
 </div>
+
+<script>
+  function goToGame() {
+    let name = document.getElementById('name-input').value;
+    window.gameName = name;
+    location.href='/game/' + name;
+  }
+</script>

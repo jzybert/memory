@@ -2,27 +2,28 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import Tile from './tile.jsx'
 
-export default function game_init(root) {
-  ReactDOM.render(<Starter />, root);
+export default function game_init(root, channel) {
+  ReactDOM.render(<Memory channel={channel} />, root);
 }
 
-class Starter extends Component {
+class Memory extends Component {
   constructor(props) {
     super(props);
 
+    this.channel = props.channel;
     this.state = {
-      tileLetters: this.getLetters(),
-      showLetters: [
-        false, false, false, false, false, false, false, false,
-        false, false, false, false, false, false, false, false
-      ],
-      matchFound: [
-        false, false, false, false, false, false, false, false,
-        false, false, false, false, false, false, false, false
-      ],
+      tileLetters: [],
+      showLetters: [],
+      matchFound: [],
       numberOfClicks: 0,
-      score: 0
+      score: 0,
+      gameOver: false
     };
+
+    this.channel.join()
+      .receive("ok", this.gotView.bind(this))
+      .receive("error", resp => {console.log("Unable to join", resp)});
+
     this.resetGame = this.resetGame.bind(this);
     this.onTileClick = this.onTileClick.bind(this);
     this.checkForMatching = this.checkForMatching.bind(this);
@@ -31,11 +32,12 @@ class Starter extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     let indices = [];
-    prevState.showLetters.forEach((letter, index) => {
-      if (letter && !prevState.matchFound[index]) {
+    this.state.showLetters.forEach((letter, index) => {
+      if (letter && !this.state.matchFound[index]) {
         indices.push(index);
       }
     });
+
     if (indices.length === 2) {
       setTimeout(() => {
         this.checkForMatching();
@@ -44,97 +46,28 @@ class Starter extends Component {
     }
   }
 
-  resetGame() {
-    this.setState({
-      tileLetters: this.getLetters(),
-      showLetters: [
-        false, false, false, false, false, false, false, false,
-        false, false, false, false, false, false, false, false
-      ],
-      matchFound: [
-        false, false, false, false, false, false, false, false,
-        false, false, false, false, false, false, false, false
-      ],
-      numberOfClicks: 0,
-      score: 0
-    });
-  };
-
-  getLetters() {
-    let availableLetters = [
-      'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
-      'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
-    ];
-    let letters = [];
-    for (let ii = 0; ii < 16; ii++) {
-      let index = Math.floor(Math.random() * availableLetters.length);
-      letters.push(availableLetters.splice(index, 1)[0]);
-    }
-    return letters;
+  gotView(view) {
+    this.setState(view.game);
   }
 
-  onTileClick(index) {
-    let indices = [];
-    this.state.showLetters.forEach((letter, index) => {
-      if (letter && !this.state.matchFound[index]) {
-        indices.push(index);
-      }
-    });
+  resetGame() {
+    this.channel.push("reset")
+      .receive("ok", this.gotView.bind(this));
+  };
 
-    if (indices.length < 2) {
-      this.setState(state => {
-        state.numberOfClicks = state.numberOfClicks + 1;
-        state.showLetters[index] = !state.showLetters[index];
-        return {
-          showLetters: state.showLetters,
-          numberOfClicks: state.numberOfClicks
-        }
-      });
-    }
+  onTileClick(index) {
+    this.channel.push("click_tile", { index: index })
+      .receive("ok", this.gotView.bind(this));
   }
 
   checkForMatching() {
-    let indices = [];
-    this.state.showLetters.forEach((letter, index) => {
-      if (letter && !this.state.matchFound[index]) {
-        indices.push(index);
-      }
-    });
-
-    if (indices.length === 2) {
-      if (this.state.tileLetters[indices[0]] === this.state.tileLetters[indices[1]]) {
-        this.setState(prevState => {
-          let matches = prevState.matchFound;
-          matches[indices[0]] = true;
-          matches[indices[1]] = true;
-          let newScore = prevState.score + 50;
-          return {
-            matchFound: matches,
-            score: newScore
-          };
-        });
-      } else {
-        this.setState(prevState => {
-          let show = prevState.showLetters;
-          show[indices[0]] = false;
-          show[indices[1]] = false;
-          return {showLetters: show};
-        });
-      }
-    }
+    this.channel.push("check_match")
+      .receive("ok", this.gotView.bind(this));
   }
 
   checkForFinish() {
-    let matches = this.state.matchFound;
-    let allMatched = matches.every(match => {
-      return match;
-    });
-    if (allMatched) {
-      this.setState(prevState => {
-        let newScore = prevState.score + Math.floor(10000 / prevState.numberOfClicks);
-        return {score: newScore};
-      });
-    }
+    this.channel.push("check_finish")
+      .receive("ok", this.gotView.bind(this));
   }
 
   render() {
