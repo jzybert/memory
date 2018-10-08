@@ -97,8 +97,8 @@ class Memory extends Component {
       }
     });
 
-    let gameOverTag = !this.state.gameOver ? <div style={{marginLeft: "11%"}}><h3>Game Over! The winner is {winningPlayer}!</h3></div> : null;
-    let returnButton = !this.state.gameOver ? <button onClick={this.onClickReturnButton}>Return to Lobby</button> : null;
+    let gameOverTag = this.state.gameOver ? <div style={{marginLeft: "11%"}}><h3>Game Over! The winner is {winningPlayer}!</h3></div> : null;
+    let returnButton = this.state.gameOver ? <button onClick={this.onClickReturnButton}>Return to Lobby</button> : null;
     return (
       <div className="row">
         <div className="column">
