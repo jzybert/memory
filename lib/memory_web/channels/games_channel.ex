@@ -2,16 +2,13 @@ defmodule MemoryWeb.GamesChannel do
   use MemoryWeb, :channel
 
   alias Memory.Game
-  alias Memory.BackupAgent
+  alias Memory.GameServer
 
   def join("games:" <> name, payload, socket) do
     if authorized?(payload) do
-      game = BackupAgent.get(name) || Game.new()
-      socket = socket
-      |> assign(:game, game)
-      |> assign(:name, name)
-      BackupAgent.put(name, game)
-      {:ok, %{"join" => name, "game" => Game.client_view(game)}, socket}
+      socket = assign(socket, :game, name)
+      game = GameServer.add_user(name, socket.assigns[:user])
+      {:ok, %{"join" => name, "game" => game}, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
@@ -31,35 +28,27 @@ defmodule MemoryWeb.GamesChannel do
   end
 
   def handle_in("click_tile", %{"index" => index}, socket) do
-    name = socket.assigns[:name]
-    game = Game.click_tile(socket.assigns[:game], index)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(name, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+    view = GameServer.click_tile(socket.assigns[:game], socket.assigns[:user], index)
+    MemoryWeb.Endpoint.broadcast("games:#{socket.assigns[:game]}", "change", view)
+    {:reply, {:ok, %{"game" => view}}, socket}
   end
 
   def handle_in("check_match", payload, socket) do
-    name = socket.assigns[:name]
-    game = Game.check_match(socket.assigns[:game])
-    socket = assign(socket, :game, game)
-    BackupAgent.put(name, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+    view = GameServer.check_match(socket.assigns[:game], socket.assigns[:user])
+    MemoryWeb.Endpoint.broadcast("games:#{socket.assigns[:game]}", "change", view)
+    {:reply, {:ok, %{"game" => view}}, socket}
   end
 
   def handle_in("check_finish", payload, socket) do
-    name = socket.assigns[:name]
-    game = Game.check_finish(socket.assigns[:game])
-    socket = assign(socket, :game, game)
-    BackupAgent.put(name, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+    view = GameServer.check_finish(socket.assigns[:game], socket.assigns[:user])
+    MemoryWeb.Endpoint.broadcast("games:#{socket.assigns[:game]}", "change", view)
+    {:reply, {:ok, %{"game" => view}}, socket}
   end
 
   def handle_in("reset", paylod, socket) do
-    name = socket.assigns[:name]
-    game = Game.new()
-    socket = assign(socket, :game, game)
-    BackupAgent.put(name, game)
-    {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+    view = GameServer.reset(socket.assigns[:game], socket.assigns[:user])
+    MemoryWeb.Endpoint.broadcast("games:#{socket.assigns[:game]}", "change", view)
+    {:reply, {:ok, %{"game" => view}}, socket}
   end
 
   # Add authorization logic here as required.

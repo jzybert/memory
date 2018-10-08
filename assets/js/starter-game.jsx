@@ -15,14 +15,18 @@ class Memory extends Component {
       tileLetters: [],
       showLetters: [],
       matchFound: [],
-      numberOfClicks: 0,
-      score: 0,
-      gameOver: false
+      gameOver: false,
+      players: {
+        "info": [],
+        "names": []
+      }
     };
 
     this.channel.join()
       .receive("ok", this.gotView.bind(this))
       .receive("error", resp => {console.log("Unable to join", resp)});
+
+    this.setWatchForBroadcast();
 
     this.resetGame = this.resetGame.bind(this);
     this.onTileClick = this.onTileClick.bind(this);
@@ -50,6 +54,12 @@ class Memory extends Component {
     this.setState(view.game);
   }
 
+  setWatchForBroadcast() {
+    this.channel.on("change", view => {
+      this.gotView({game: view});
+    });
+  }
+
   resetGame() {
     this.channel.push("reset")
       .receive("ok", this.gotView.bind(this));
@@ -70,7 +80,25 @@ class Memory extends Component {
       .receive("ok", this.gotView.bind(this));
   }
 
+  onClickReturnButton() {
+    window.location.href = "/";
+  }
+
   render() {
+    let names = this.state.players["names"];
+    let playerInfo = this.state.players["info"];
+    let maxScore = -1;
+    let winningPlayer = "";
+    names.forEach((name, ii) => {
+      let score = playerInfo[ii]["score"];
+      if (score > maxScore) {
+        maxScore = score;
+        winningPlayer = name;
+      }
+    });
+
+    let gameOverTag = this.state.gameOver ? <div style={{marginLeft: "11%"}}><h3>Game Over! The winner is {winningPlayer}!</h3></div> : null;
+    let returnButton = this.state.gameOver ? <button onClick={this.onClickReturnButton}>Return to Lobby</button> : null;
     return (
       <div className="column">
         <div className="row">
@@ -197,7 +225,10 @@ class Memory extends Component {
           <button onClick={this.resetGame}>Reset Game</button>
         </div>
         <div className="row">
-          <span className="score">Score: {this.state.score}</span>
+          {gameOverTag}
+        </div>
+        <div className="row">
+          {returnButton}
         </div>
       </div>
     );

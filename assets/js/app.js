@@ -20,6 +20,8 @@ import $ from "jquery";
 import socket from "./socket";
 import game_init from "./starter-game";
 
+socket.connect();
+
 function start() {
   let root = document.getElementById('root');
   if (root) {
