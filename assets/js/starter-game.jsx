@@ -126,19 +126,21 @@ class Memory extends Component {
       }
     });
 
+    let player1 = this.state.players["names"].length >= 1 ? this.state.players["names"][0] : null;
+    let player2 = this.state.players["names"].length >= 2 ? this.state.players["names"][1] : null;
     let gameOverTag = this.state.gameOver ? <div style={{marginLeft: "11%"}}><h3>Game Over! The winner is {winningPlayer}!</h3></div> : null;
     let returnButton = this.state.gameOver ? <button onClick={this.onClickReturnButton}>Return to Lobby</button> : null;
-
 
     return (
       <div className="row">
         <div className="column">
+          <h3>{player1} Vs. {player2}</h3>
           {this.createTiles()}
+        </div>
+        <div className="column">
           <div className="row">
             <button onClick={this.resetGame}>Reset Game</button>
           </div>
-        </div>
-        <div className="column">
           <div className="row">
             {gameOverTag}
           </div>
